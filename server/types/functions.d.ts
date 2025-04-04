@@ -71,6 +71,12 @@ declare global {
   var publicPath: () => string;
 
   /**
+   * The path to the public directory, which is typically the web server's document root.
+   * This is where publicly accessible files.
+   */
+  var uploadPath: () => string;
+
+  /**
    * The path to the database directory, where database-related files or configurations might be stored.
    */
   var databasePath: () => string;
@@ -213,4 +219,11 @@ declare global {
    * TMP_PATH
    */
   var TMP_PATH: string;
+
+  /**
+   * Transfer a file into a new location.
+   * @param {string} filePath - The path to the file to be transferred.
+   * @param {string} destination - The destination path where the file should be transferred.
+   */
+  var transferFile: (filePath: string, destination: string) => boolean;
 }

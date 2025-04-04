@@ -11,7 +11,7 @@ export interface IFileHandler {
 export interface IFile {
   originalname: string;
   mimetype: string;
-  tmp_name: String;
+  tmp_name: string;
   size: number;
   error: number;
   message?: string;

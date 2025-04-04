@@ -3,6 +3,7 @@ import path from "path";
 import Configure from "./Configure";
 import Carbon from "../datetime/Carbon";
 import Express from "./Express";
+import fs from "fs";
 dotenv.config();
 
 Object.defineProperty(globalThis, "env", {
@@ -65,6 +66,14 @@ Object.defineProperty(globalThis, "resourcePath", {
 Object.defineProperty(globalThis, "publicPath", {
   value: (): string => {
     return path.join(__dirname, "..", "..", "public");
+  },
+  writable: false,
+  configurable: false,
+});
+
+Object.defineProperty(globalThis, "uploadPath", {
+  value: (): string => {
+    return path.join(publicPath(), "uploads");
   },
   writable: false,
   configurable: false,
@@ -200,6 +209,7 @@ Object.defineProperty(globalThis, "base64UrlDecode", {
 });
 
 import { DateTime } from "luxon";
+import { loopWhile } from "@kaciras/deasync";
 
 const getRelativeTime = (
   expression: string,
@@ -362,6 +372,42 @@ Object.defineProperty(globalThis, "end", {
 
 Object.defineProperty(globalThis, "TMP_PATH", {
   value: basePath() + "/tmp",
+  writable: false,
+  configurable: false,
+});
+
+const ensureDirectoryExistence = (filePath: string) => {
+  const dir = path.dirname(filePath);
+  if (fs.existsSync(dir)) {
+    return true;
+  }
+  fs.mkdirSync(dir, { recursive: true });
+  return true;
+};
+
+Object.defineProperty(globalThis, "transferFile", {
+  value: (filePath: string, destination: string): boolean => {
+    // Ensure the target directory exists
+    ensureDirectoryExistence(destination);
+
+    let done = false;
+    let forReturn = false;
+
+    // Use fs.rename to move the file
+    fs.rename(filePath, destination, (err) => {
+      if (err) {
+        forReturn = false;
+        done = true;
+      } else {
+        forReturn = true;
+        done = true;
+      }
+    });
+
+    // Loop until the operation is complete
+    loopWhile(() => !done);
+    return forReturn;
+  },
   writable: false,
   configurable: false,
 });

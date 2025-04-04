@@ -1,12 +1,8 @@
 import "../services/functions";
 import "../services/variables";
-import express, {
-  Express,
-  Request,
-  Response,
-  NextFunction,
-  Router,
-} from "express";
+import express, { Request, Response, NextFunction } from "express";
+
+// Extend the Request interface to include the 'files' property
 import morgan from "morgan";
 import path from "path";
 import fs from "fs";
@@ -20,11 +16,12 @@ import { RedisStore } from "connect-redis";
 import renderData from "../services/DD";
 import FileHandler from "./FileHandler";
 import Boot from "../services/Boot";
+import { IFile } from "../kiratrizon/interfaces";
 
 class Server {
   static express = express;
-  static app: Express = Server.express();
-  static router: Router = Server.express.Router();
+  static app = express(); // Correct initialization
+  static router: express.Router = express.Router();
   private static baseUrl: string = "";
   private static routes: Record<string, any> = {};
 
@@ -80,7 +77,25 @@ class Server {
     });
 
     Server.app.post("/upload", (req: Request, res: Response) => {
-      res.json({ FILES });
+      if ("hello" in FILES) {
+        const fileObj: IFile = FILES["hello"];
+        const fileName: string = `random_${Math.floor(
+          Math.random() * 1000000
+        )}.${fileObj["originalname"].split(".").pop()}`;
+        const pathToSave: string = path.join(uploadPath(), "images", fileName);
+        const tpmPath: string = fileObj["tmp_name"];
+
+        if (transferFile(tpmPath, pathToSave)) {
+          res.status(200).json({
+            message: "File uploaded successfully.",
+            filePath: pathToSave,
+          });
+          return;
+        }
+      }
+
+      // If file isn't found in FILES, return this response
+      res.status(400).json({ message: "File upload failed." });
     });
   }
 
@@ -128,6 +143,7 @@ class Server {
 }
 
 Server.boot();
+
 const app = Server.app;
 
 export default app;

@@ -1,3 +1,5 @@
+import { IFile } from "../kiratrizon/interfaces";
+
 // variables
 export {};
 declare global {
@@ -18,7 +20,7 @@ declare global {
    * Represents the FILES data sent to the server in an HTTP request. This array
    * can be used to access uploaded files via the HTTP POST method.
    */
-  var FILES: Record<string, any>;
+  var FILES: { [key: string]: IFile } | {};
 
   /**
    * Represents the session data for the current user. This object can be used to
